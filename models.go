@@ -1,45 +1,43 @@
 package main
 
 import (
-	"fmt"
-	"time"
+//	"fmt"
+//	"time"
 )
 
+type Transaction struct {
+	query		Query	`json:"query"	bson:"query"`
+	Result		int64	`json:"result"  bson:"result"`
 
+}
 
-type UserManager struct {
-	user		User
+type Query struct {
+	From		string 	`json:"from" 	bson:"from"`
+	To		string  `json:"to"  	bson:"to"`
+	Amount		int64	`json:"amount"  bson:"value"`
+}
+
+func (t *Transaction) Read(p []byte) (n int, err error) {
+		
 }
 
 
-type User struct {
-	Username	string
-	Password	string
-	Id		string
+func NewTransaction() (*Transaction) {
+	transaction := &Transaction {
+	}
+
+	return transaction
+}
+
+func NewTransaction(from string, to string, amount int64) (*Transcation) {
+	transaction := &Transaction{
+		from:	from,
+		to:	to,
+		amount	amount,
+	}
+
+	return transaction
 }
 
 
-func (um UserManager) CreateUser(username string, password string) {
-	user := new(user)
-
-	user.Username = username
-	user.Password = password
-
-	um.user = user
-	um.GenerateId()
-
-	//write User model to database.
-}
-
-func (um UserManager) CheckIfCredentialsExist (username string, password string) bool {
-		// check if credentials exists
-
-		return false
-}
-
-func (um UserManager) CheckIfUsernameExist (username string) bool {
-		// check if credentials exists
-
-		return false
-}
 
