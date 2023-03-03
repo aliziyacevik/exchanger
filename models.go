@@ -12,30 +12,18 @@ type Transaction struct {
 }
 
 type Query struct {
-	From		string 	`json:"from" 	bson:"from"`
-	To		string  `json:"to"  	bson:"to"`
+	From		Symbol 	`json:"from"	bson:"from"`
+	To		Symbol  `json:"from"	bson:"from"`
 	Amount		int64	`json:"amount"  bson:"value"`
 }
 
-func (t *Transaction) Read(p []byte) (n int, err error) {
-		
+type Symbol struct {
+	Value		string `json:"value"	bson:"value"`
+	Description	string `json:"desc"	bson:"desc"`
 }
 
-
-func NewTransaction() (*Transaction) {
-	transaction := &Transaction {
-	}
-
-	return transaction
-}
-
-func NewTransaction(from string, to string, amount int64) (*Transcation) {
-	transaction := &Transaction{
-		from:	from,
-		to:	to,
-		amount	amount,
-	}
-
+func NewTransaction(from string, to string, amount int64) (*Transaction) {
+	transaction := &Transaction{}
 	return transaction
 }
 

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"os"
-	"net/http"
+//	"os"
+//	"net/http"
 )
 
 
@@ -16,12 +16,8 @@ func NewConverterService() ConverterService{
 	}
 }
 
-func (c *converterService) Convert(from string, to string, amount int64) {
-	key := os.Getenv("FIXER_IO_KEY")
-        url := fmt.Sprintf("https://data.fixer.io/api/convert?access_key=%d&from=%s&to=%s&amount=%s", from, to, amount)
-
-	resp, err := http.Post(url, "application/json")
-	
+func (c *converterService) Convert(from string, to string, amount int64) (error){
+	return nil
 
 }
 
