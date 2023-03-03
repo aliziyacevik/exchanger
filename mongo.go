@@ -17,7 +17,8 @@ import (
 // Replace the placeholders with your credentials
 const uri = "mongodb+srv://alizcev:lalalandAa.@cluster0.sample.mongodb.net/?retryWrites=true&w=majority"
 
-var symbols [] interface{}
+var symbols	[] interface{}
+var currencies 	[] interface{}
 
 type mongoRepository struct {
 	client		*mongo.Client
@@ -84,6 +85,7 @@ func (mr *mongoRepository)createIndex() {
 */
 func (mr *mongoRepository) ImportInitialData() error {
 	insertSymbols()
+	insertCurrencies()
 
 	coll := mr.client.Database(mr.database).Collection("symbols")
 	
@@ -127,6 +129,51 @@ func insertSymbols() error {
 
 	log.Printf("%d symbols has been loaded into memory", count)
 	return nil
+}
+
+func insertCurrencies() {
+	count := 0
+	f, err := os.Open("currencies.json")
+
+	if err != nil {
+		return errors.Wrap(err,"mongo.insertCurrenciess") 
+	}
+	
+	defer f.Close()
+	
+	lines, err := csv.NewReader(f).ReadAll()
+	if err != nil {
+		return errors.Wrap(err, "mongo.insertCurrencies")
+	}
+	
+	for _, line := range lines {
+		fmt.Println(line)
+		//var symbol Symbol
+		//bsonBytes,_ := bson.Marshal(value)
+		bson.Unmarshal(bsonBytes, &symbol)
+		
+		//val := symbol.Value
+	}
+
+}
+
+func fetchCurrency() {
+  url := "https://api.apilayer.com/fixer/convert?to={to}&from={from}&amount={amount}"
+
+  client := &http.Client {}
+  req, err := http.NewRequest("GET", url, nil)
+  req.Header.Set("apikey", "B8Pl9MAMErjNKChI8h0BEzMyb6Y986nS")
+
+  if err != nil {
+    fmt.Println(err)
+  }
+  res, err := client.Do(req)
+	if res.Body != nil {
+    defer res.Body.Close()
+  }
+  body, err := ioutil.ReadAll(res.Body)
+
+  fmt.Println(string(body))
 }
 
 

@@ -18,6 +18,7 @@ func main() {
 	}
 	fmt.Println(mr.database)
 	mr.ImportInitialData()
+	insertCurrencies()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	
