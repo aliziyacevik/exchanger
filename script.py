@@ -1,7 +1,6 @@
 #! ./venv/bin/python3.10
 import requests
 import os
-import json
 
 import pandas as pd # for converting json to csv
 
@@ -21,17 +20,17 @@ def get_symbols():
     response = requests.request("GET", url, headers=headers, data=payload)
     if response.status_code != 200:
         pass
-    data_text = response.text    #string or text data
-    data_json = json.loads(data_text) #json data
+    data_text = response.text    #string or text data in JSON format.
+    return data_text
 
-    return data_json
-
-def convert_to_csv(data):
+def save_to_csv(data):
     data_frame = pd.read_json(data)
+    data_frame = data_frame.drop(columns = 'success')
     data_frame.to_csv('symbols.csv')
 
+    
 if __name__ == "__main__":
     load_dotenv()
-    data_json = get_symbols()
-    convert_to_csv(data_json)
+    data_text = get_symbols()
+    save_to_csv(data_text)
 

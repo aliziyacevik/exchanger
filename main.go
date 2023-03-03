@@ -42,6 +42,8 @@ func main() {
 			from := chi.URLParam("from")
 			to := chi.URLParam("to")
 			amount := chi.URLParam("amount")
+			
+			//service.Convert()
 
 			w.Write([]byte(from + to +amount))
 
