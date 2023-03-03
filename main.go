@@ -12,12 +12,12 @@ import (
 func main() {
 	r := chi.NewRouter()
 	uri := "mongodb+srv://alizcev:lalalandAa.1@cluster0.qhgc1iz.mongodb.net/?retryWrites=true&w=majority"
-	mr, err := NewMongoRepository(uri, "lala", 10)	
+	mr, err := NewMongoRepository(uri, "exchanger", 10)	
 	if err != nil {
 		log.Fatal(err)
 	}
 	fmt.Println(mr.database)
-	insertSymbols()
+	mr.ImportInitialData()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
 	

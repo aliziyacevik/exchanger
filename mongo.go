@@ -19,7 +19,7 @@ const uri = "mongodb+srv://alizcev:lalalandAa.@cluster0.sample.mongodb.net/?retr
 
 var symbols [] interface{}
 
-type MongoRepository struct {
+type mongoRepository struct {
 	client		*mongo.Client
 	database	string
 	timeout		time.Duration
@@ -56,13 +56,13 @@ func newMongoClient(mongoURL string, mongoTimeout int) (*mongo.Client, error) {
 }	
 
 
-func NewMongoRepository(mongoURL string, mongoDB string, mongoTimeout int) (*MongoRepository, error) {
+func NewMongoRepository(mongoURL string, mongoDB string, mongoTimeout int) (*mongoRepository, error) {
 	client, err := newMongoClient(mongoURL, mongoTimeout)
 	
 	if err != nil {
 		return nil, err
 	}
-	repo := &MongoRepository{
+	repo := &mongoRepository{
 		client:		client,
 		timeout:	time.Duration(mongoTimeout) * time.Second,
 		database:	mongoDB,
@@ -70,6 +70,35 @@ func NewMongoRepository(mongoURL string, mongoDB string, mongoTimeout int) (*Mon
 
 	return repo, nil
 }
+/*
+func (mr *mongoRepository)createIndex() {
+	ctx, cancel := context.WithTimeout(context.Background(), mr.timeout)
+	defer cancel()
+
+	model := mongo.IndexModel{
+		Keys:	bson.D{
+				{"value"}
+			}
+	}
+}
+*/
+func (mr *mongoRepository) ImportInitialData() error {
+	insertSymbols()
+
+	coll := mr.client.Database(mr.database).Collection("symbols")
+	
+	ctx, cancel := context.WithTimeout(context.Background(), mr.timeout)
+	defer cancel()
+
+	_, err := coll.InsertMany(ctx, symbols)
+	if err != nil {
+		return errors.Wrap(err, "mongo.ImportInitialData")
+	}
+
+	log.Println("Initial data imported successfully..")
+	return nil
+}
+
 
 func insertSymbols() error {
 	count := 0
