@@ -12,9 +12,9 @@ type Transaction struct {
 }
 
 type Query struct {
-	From		Symbol 	`json:"from"	bson:"from"`
-	To		Symbol  `json:"from"	bson:"from"`
-	Amount		int64	`json:"amount"  bson:"value"`
+	From		string 	`json:"from"	bson:"from"`
+	To		string  `json:"to"	bson:"to"`
+	Amount		int64	`json:"amount"  bson:"amount"`
 }
 
 type Symbol struct {

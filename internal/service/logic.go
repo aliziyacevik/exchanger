@@ -1,5 +1,9 @@
 package service
 
+import (
+	"log"
+)
+
 type converterService struct {
 	repository	Repository
 }
@@ -10,7 +14,9 @@ func NewConverterService(repo Repository) ConverterService {
 	}
 }
 
-func (c *converterService) Convert(from string, to string, amount int64) error {
+func (c *converterService) Convert(q Query) error {
+	log.Println("here", q.From, q.To, q.Amount)
+
 	return nil
 }
 

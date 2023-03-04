@@ -1,6 +1,6 @@
 package service 
 
 type ConverterService interface {
-	Convert (from string, to string, amount int64) (error)
+	Convert (q Query) (error)
 	//Store(transaction *Transaction) (error)
 }

@@ -91,6 +91,22 @@ func (mr *mongoRepository)createIndex() {
 */
 
 func (mr *mongoRepository) Find(base string) (*s.Currency, error) {
+	coll := mr.client.Database(mr.database).Collection("currencies")
+	ctx, cancel := context.WithTimeout(context.Background(), mr.timeout)
+	defer cancel()
+	
+	var result bson.M
+	err := coll.FindOne(
+		ctx,
+		bson.D{
+			{"base", base},
+		},
+	).Decode(&result)
+	if err != nil {
+		return nil, errors.Wrap(err, "repository.Find")
+	}
+
+	log.Println(result)
 	return nil, nil
 
 }
