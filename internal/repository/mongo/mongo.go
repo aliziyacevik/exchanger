@@ -10,6 +10,8 @@ import (
 	"encoding/json"
 	"io/ioutil"
 
+	s"github.com/aliziyacevik/exchanger/internal/service"
+
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -61,7 +63,7 @@ func newMongoClient(mongoURL string, mongoTimeout int) (*mongo.Client, error) {
 }	
 
 
-func NewMongoRepository(mongoURL string, mongoDB string, mongoTimeout int) (*mongoRepository, error) {
+func NewMongoRepository(mongoURL string, mongoDB string, mongoTimeout int) (s.Repository, error) {
 	client, err := newMongoClient(mongoURL, mongoTimeout)
 	
 	if err != nil {
@@ -87,6 +89,12 @@ func (mr *mongoRepository)createIndex() {
 	}
 }
 */
+
+func (mr *mongoRepository) Find(base string) (*s.Currency, error) {
+	return nil, nil
+
+}
+
 func (mr *mongoRepository) ImportInitialData() error {
 	insertSymbols()
 	insertCurrencies()
