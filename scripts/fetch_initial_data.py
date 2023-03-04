@@ -1,4 +1,8 @@
 #! ./venv/bin/python3.10
+
+"""
+    Fetches the initial data and stores in both csv and json files.
+"""
 import requests
 import os
 import json

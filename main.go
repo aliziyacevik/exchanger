@@ -2,30 +2,29 @@ package main
 
 import (
 	"net/http"
-	"fmt"
 	"log"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+
+	"github.com/aliziyacevik/exchanger/internal/repository/mongo"
+
 )
 
 
 func main() {
 	r := chi.NewRouter()
 	uri := "mongodb+srv://alizcev:lalalandAa.1@cluster0.qhgc1iz.mongodb.net/?retryWrites=true&w=majority"
-	mr, err := NewMongoRepository(uri, "exchanger", 10)	
+	mr, err := mongo.NewMongoRepository(uri, "exchanger", 10)	
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(mr.database)
 	err = mr.ImportInitialData()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	insertCurrencies()
 	r.Use(middleware.RequestID)
 	r.Use(middleware.Logger)
-	
 	
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte("welcome to the bank"))
@@ -41,5 +40,6 @@ func main() {
 	})
 
 	//http.ListenAndServe(":3000", r)
+
 
 }

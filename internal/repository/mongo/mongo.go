@@ -1,4 +1,4 @@
-package main
+package mongo 
 
 import (
 	"context"
@@ -105,12 +105,10 @@ func (mr *mongoRepository) ImportInitialData() error {
 	ctx, cancel = context.WithTimeout(context.Background(), mr.timeout)
 	defer cancel()
 	
-	log.Println(currencies)
 	_, err = coll.InsertMany(ctx, currencies)
 	if err != nil {
 		return errors.Wrap(err, "mongo.ImportInitialData.currencies")
 	}
-
 
 	log.Println("Initial data imported successfully..")
 	return nil
@@ -161,7 +159,7 @@ func insertCurrencies() error {
 	if err != nil {
 		return errors.Wrap(err, "mongo.insertCurrencies")
 	}
-	//log.Println(currencies[0]["base"])
+	log.Println("currencies has been aded to the memory.")
 
 	return nil
 }
