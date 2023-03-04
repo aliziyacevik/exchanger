@@ -7,6 +7,9 @@ import (
 	"os"
 	"log"
 	"encoding/csv"
+	"encoding/json"
+	"io/ioutil"
+
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,7 +21,8 @@ import (
 const uri = "mongodb+srv://alizcev:lalalandAa.@cluster0.sample.mongodb.net/?retryWrites=true&w=majority"
 
 var symbols	[] interface{}
-var currencies 	[] interface{}
+var currencies 	[] interface{} 
+
 
 type mongoRepository struct {
 	client		*mongo.Client
@@ -96,6 +100,17 @@ func (mr *mongoRepository) ImportInitialData() error {
 	if err != nil {
 		return errors.Wrap(err, "mongo.ImportInitialData")
 	}
+	
+	coll = mr.client.Database(mr.database).Collection("currencies")
+	ctx, cancel = context.WithTimeout(context.Background(), mr.timeout)
+	defer cancel()
+	
+	log.Println(currencies)
+	_, err = coll.InsertMany(ctx, currencies)
+	if err != nil {
+		return errors.Wrap(err, "mongo.ImportInitialData.currencies")
+	}
+
 
 	log.Println("Initial data imported successfully..")
 	return nil
@@ -121,7 +136,7 @@ func insertSymbols() error {
 	for _, line := range lines {
 		value := line[0]
 		desc := line[1]
-		print(value, desc)	
+		//print(value, desc)	
 		symbol := bson.D{{"value", value}, {"description", desc}}
 		symbols = append(symbols, symbol)
 		count ++
@@ -131,49 +146,24 @@ func insertSymbols() error {
 	return nil
 }
 
-func insertCurrencies() {
-	count := 0
+func insertCurrencies() error {
 	f, err := os.Open("currencies.json")
-
+	defer f.Close()
+	
 	if err != nil {
 		return errors.Wrap(err,"mongo.insertCurrenciess") 
 	}
 	
-	defer f.Close()
-	
-	lines, err := csv.NewReader(f).ReadAll()
+	byteValue, _ := ioutil.ReadAll(f)
+	//result := Currency{}
+
+	err = json.Unmarshal([]byte(byteValue), &currencies)
 	if err != nil {
 		return errors.Wrap(err, "mongo.insertCurrencies")
 	}
-	
-	for _, line := range lines {
-		fmt.Println(line)
-		//var symbol Symbol
-		//bsonBytes,_ := bson.Marshal(value)
-		bson.Unmarshal(bsonBytes, &symbol)
-		
-		//val := symbol.Value
-	}
+	//log.Println(currencies[0]["base"])
 
-}
-
-func fetchCurrency() {
-  url := "https://api.apilayer.com/fixer/convert?to={to}&from={from}&amount={amount}"
-
-  client := &http.Client {}
-  req, err := http.NewRequest("GET", url, nil)
-  req.Header.Set("apikey", "B8Pl9MAMErjNKChI8h0BEzMyb6Y986nS")
-
-  if err != nil {
-    fmt.Println(err)
-  }
-  res, err := client.Do(req)
-	if res.Body != nil {
-    defer res.Body.Close()
-  }
-  body, err := ioutil.ReadAll(res.Body)
-
-  fmt.Println(string(body))
+	return nil
 }
 
 
