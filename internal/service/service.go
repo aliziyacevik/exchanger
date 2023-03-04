@@ -1,6 +1,6 @@
 package service 
 
 type ConverterService interface {
-	Convert (q Query) (error)
+	Convert (q Query) (*Transaction, error)
 	//Store(transaction *Transaction) (error)
 }

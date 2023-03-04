@@ -42,9 +42,12 @@ func main() {
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 			}
-			log.Println("/convert", q.Amount, q.To)
-			service.Convert(q)	
-			w.Write([]byte(q.From + q.To))
+			res, err := service.Convert(q)	
+			resJson, err := json.Marshal(res)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			w.Write([]byte(resJson))
 	})
 
 	http.ListenAndServe(":3000", r)

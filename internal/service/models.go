@@ -6,15 +6,15 @@ import (
 )
 
 type Transaction struct {
-	query		Query	`json:"query"	bson:"query"`
-	Result		int64	`json:"result"  bson:"result"`
+	Query		Query	`json:"query"	bson:"query"`
+	Result		float64	`json:"result"  bson:"result"`
 
 }
 
 type Query struct {
 	From		string 	`json:"from"	bson:"from"`
 	To		string  `json:"to"	bson:"to"`
-	Amount		int64	`json:"amount"  bson:"amount"`
+	Amount		float64	`json:"amount"  bson:"amount"`
 }
 
 type Symbol struct {

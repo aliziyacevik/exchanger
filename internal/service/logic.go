@@ -1,9 +1,5 @@
 package service
 
-import (
-	"log"
-)
-
 type converterService struct {
 	repository	Repository
 }
@@ -14,9 +10,24 @@ func NewConverterService(repo Repository) ConverterService {
 	}
 }
 
-func (c *converterService) Convert(q Query) error {
-	log.Println("here", q.From, q.To, q.Amount)
+func (c *converterService) Convert(q Query) (*Transaction,error) {
+	currency := &Currency{}	
+	currency, err := c.repository.Find(q.From)
+	if err != nil {
+		return nil, err
+	}
+	result := calculateConversion(q.Amount, currency.Rates[q.To])
+	
+	transaction := &Transaction{
+		Query:		q,
+		Result:		result,
+	}
 
-	return nil
+	return transaction, nil
 }
+
+func calculateConversion(amount float64, rate float64) float64 {
+	return amount * rate
+}
+
 

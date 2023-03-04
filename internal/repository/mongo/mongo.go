@@ -90,12 +90,12 @@ func (mr *mongoRepository)createIndex() {
 }
 */
 
-func (mr *mongoRepository) Find(base string) (*s.Currency, error) {
+func (mr *mongoRepository) Find(base string) (*s.Currency, error) {	
 	coll := mr.client.Database(mr.database).Collection("currencies")
 	ctx, cancel := context.WithTimeout(context.Background(), mr.timeout)
 	defer cancel()
 	
-	var result bson.M
+	var result s.Currency 
 	err := coll.FindOne(
 		ctx,
 		bson.D{
@@ -103,12 +103,11 @@ func (mr *mongoRepository) Find(base string) (*s.Currency, error) {
 		},
 	).Decode(&result)
 	if err != nil {
-		return nil, errors.Wrap(err, "repository.Find")
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.Wrap(err, "repository.Find")
+		}
 	}
-
-	log.Println(result)
-	return nil, nil
-
+	return &result, nil 
 }
 
 func (mr *mongoRepository) ImportInitialData() error {
