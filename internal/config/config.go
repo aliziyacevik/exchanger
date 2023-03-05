@@ -59,6 +59,7 @@ func LoadRepositoryConfig() RepositoryConfiguration {
 	switch os.Getenv("DB") {
          case "mongo":
 		 c := &repositoryConfiguration{}
+		 c.Data = make(map[string]string)
 		 c.Insert("MONGO_URL", os.Getenv("MONGO_URL"))
 		 c.Insert("MONGO_DB", os.Getenv("MONGO_DB"))
 		 c.Insert("MONGO_TIMEOUT", "15")
