@@ -16,17 +16,15 @@ import (
 
 func main() {
 	repo := chooseRepo()
+	repo.InsertInitialDataToMongo()
 	
-	err :=repo.ImportInitialData()
-	if err != nil {
-		log.Fatal(err)
-	}
 
 	service := s.NewService(repo)
 	handler := api.NewHandler(service)
-	http.HandleFunc("/convert", api.AllowMethods(handler.Post, "POST"))	
-	http.HandleFunc("/", handler.Get)
 	
+	http.HandleFunc("/convert", api.AllowMethods(handler.Post, "POST"))
+	http.HandleFunc("/", api.AllowMethods(handler.Get, "GET"))
+
 	server := http.Server{
 		Addr:		":3000",
 	}

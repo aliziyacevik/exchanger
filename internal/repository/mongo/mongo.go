@@ -51,12 +51,12 @@ func newMongoClient(mongoURL string, mongoTimeout int) (*mongo.Client, error) {
 	
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "mongo.newMongoClient while connecting")
 	}
 	
 	err = client.Ping(ctx, readpref.Primary())
 	if err != nil {
-		return nil, errors.Wrap(err, "mongo.newMongoClient")
+		return nil, errors.Wrap(err, "mongo.newMongoClient while pinging")
 	}
 	
 	return client, nil
@@ -74,7 +74,7 @@ func NewMongoRepository(mongoURL string, mongoDB string, mongoTimeout int) (s.Re
 		timeout:	time.Duration(mongoTimeout) * time.Second,
 		database:	mongoDB,
 	}
-
+	log.Println("Mongo repository created and ready..")
 	return repo, nil
 }
 /*
@@ -110,10 +110,17 @@ func (mr *mongoRepository) Find(base string) (*s.Currency, error) {
 	return &result, nil 
 }
 
-func (mr *mongoRepository) ImportInitialData() error {
-	insertSymbols()
-	insertCurrencies()
+func (mr *mongoRepository) InsertInitialDataToMongo() {
+	insertSymbolsToMemory()
+	insertCurrenciesToMemory()
 
+	mr.insertSymbolsToMongo()
+	mr.insertCurrenciesToMongo()
+
+	log.Println("Initial data inserted successfully..")
+}
+
+func (mr *mongoRepository) insertSymbolsToMongo() {
 	coll := mr.client.Database(mr.database).Collection("symbols")
 	
 	ctx, cancel := context.WithTimeout(context.Background(), mr.timeout)
@@ -121,36 +128,36 @@ func (mr *mongoRepository) ImportInitialData() error {
 
 	_, err := coll.InsertMany(ctx, symbols)
 	if err != nil {
-		return errors.Wrap(err, "mongo.ImportInitialData")
+		log.Fatal(errors.Wrap(err, "mongo.insertSymbolsToMongo"))
 	}
 	
-	coll = mr.client.Database(mr.database).Collection("currencies")
-	ctx, cancel = context.WithTimeout(context.Background(), mr.timeout)
+}
+
+func (mr *mongoRepository) insertCurrenciesToMongo() {
+	coll := mr.client.Database(mr.database).Collection("currencies")
+	ctx, cancel := context.WithTimeout(context.Background(), mr.timeout)
 	defer cancel()
 	
-	_, err = coll.InsertMany(ctx, currencies)
+	_, err := coll.InsertMany(ctx, currencies)
 	if err != nil {
-		return errors.Wrap(err, "mongo.ImportInitialData.currencies")
+		log.Fatal(errors.Wrap(err, "mongo.insertCurrenciesToMongo"))
 	}
-
-	log.Println("Initial data imported successfully..")
-	return nil
 }
 
 
-func insertSymbols() error {
+func insertSymbolsToMemory(){
 	count := 0
 	f, err := os.Open("symbols.csv")
 
 	if err != nil {
-		return errors.Wrap(err,"mongo.insertSymbols") 
+		log.Fatal(errors.Wrap(err, "mongo.insertSymbolsToMemory"))
 	}
 	
 	defer f.Close()
 	
 	lines, err := csv.NewReader(f).ReadAll()
 	if err != nil {
-		return errors.Wrap(err, "mongo.insertSymbols")
+		log.Fatal(errors.Wrap(err, "mongo.insertSymbolsToMemory"))
 	}
 
 	lines = lines[1:]
@@ -164,15 +171,14 @@ func insertSymbols() error {
 	}
 
 	log.Printf("%d symbols has been loaded into memory", count)
-	return nil
 }
 
-func insertCurrencies() error {
+func insertCurrenciesToMemory() {
 	f, err := os.Open("currencies.json")
 	defer f.Close()
 	
 	if err != nil {
-		return errors.Wrap(err,"mongo.insertCurrenciess") 
+		log.Fatal(errors.Wrap(err,"mongo.insertCurrenciess")) 
 	}
 	
 	byteValue, _ := ioutil.ReadAll(f)
@@ -180,11 +186,9 @@ func insertCurrencies() error {
 
 	err = json.Unmarshal([]byte(byteValue), &currencies)
 	if err != nil {
-		return errors.Wrap(err, "mongo.insertCurrencies")
+		log.Fatal(errors.Wrap(err,"mongo.insertCurrenciesToMemory")) 
 	}
 	log.Println("currencies has been aded to the memory.")
-
-	return nil
 }
 
 
