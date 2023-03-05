@@ -6,8 +6,6 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/joho/godotenv"
 
 	"github.com/aliziyacevik/exchanger/internal/repository/mongo"
@@ -17,10 +15,6 @@ import (
 
 
 func main() {
-	r := chi.NewRouter()
-	r.Use(middleware.RequestID)
-	r.Use(middleware.Logger)
-	
 	repo := chooseRepo()
 	
 	err :=repo.ImportInitialData()
@@ -29,15 +23,15 @@ func main() {
 	}
 
 	service := s.NewService(repo)
-	handler := api.NewHandler(service, r)
-	r.Post("/convert", handler.Post)	
-	r.Get("/", handler.Get)
+	handler := api.NewHandler(service)
+	http.HandleFunc("/convert", api.AllowMethods(handler.Post, "POST"))	
+	http.HandleFunc("/", handler.Get)
 	
 	server := http.Server{
 		Addr:		":3000",
-		Handler:	r,
 	}
 	
+	log.Println("listening..")	
 	log.Fatal(server.ListenAndServe())
 }
 

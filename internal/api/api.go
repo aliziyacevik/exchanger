@@ -3,6 +3,7 @@ package api
 import (
 	"net/http"
 	"encoding/json"
+	"log"
 
 	s"github.com/aliziyacevik/exchanger/internal/service"
 
@@ -16,7 +17,6 @@ type Handler interface {
 
 type handler struct {
 	service		s.Service
-	mux		http.Handler
 }
 
 func (h *handler) Post(w http.ResponseWriter, r*http.Request) {
@@ -38,11 +38,31 @@ func (h *handler) Get(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("ratatata"))
 }
 
+func AllowMethods(fn func(http.ResponseWriter, *http.Request), listOfAllowedMethods ...string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		isAllowed := false
+		for _, method := range listOfAllowedMethods {
+			if r.Method == method {
+				isAllowed = true
+				break
+			}
+		}
 
-func NewHandler(service s.Service, h http.Handler) Handler {
+		if isAllowed == false {
+			log.Println("Method not allowed")
+			http.Error(w, "Method not allowed.", http.StatusMethodNotAllowed)
+			return
+		}
+	
+	fn(w, r)
+	}
+
+}
+
+
+func NewHandler(service s.Service) Handler {
 	return &handler{
 		service:	service,
-		mux:		h,
 	}
 }
 
