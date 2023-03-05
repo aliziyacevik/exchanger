@@ -1,18 +1,18 @@
 package service
 
-type converterService struct {
+type service struct {
 	repository	Repository
 }
 
-func NewConverterService(repo Repository) ConverterService {
-	return &converterService{
+func NewService(repo Repository) Service {
+	return &service{
 		repository:	repo,
 	}
 }
 
-func (c *converterService) Convert(q Query) (*Transaction,error) {
+func (s *service) Convert(q Query) (*Transaction,error) {
 	currency := &Currency{}	
-	currency, err := c.repository.Find(q.From)
+	currency, err := s.repository.Find(q.From)
 	if err != nil {
 		return nil, err
 	}
