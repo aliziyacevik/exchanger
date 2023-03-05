@@ -3,22 +3,23 @@ package main
 import (
 	"net/http"
 	"log"
-	"os"
-	"strconv"
+	"time"
 
-	"github.com/joho/godotenv"
 
 	"github.com/aliziyacevik/exchanger/internal/repository/mongo"
 	s"github.com/aliziyacevik/exchanger/internal/service"
 	"github.com/aliziyacevik/exchanger/internal/api"
+	"github.com/aliziyacevik/exchanger/internal/config"
+
 )
 
-
 func main() {
-	repo := chooseRepo()
+	serverConfig := config.LoadServerConfig()
+	repoConfig := config.LoadRepositoryConfig()
+	
+	repo := chooseRepo(repoConfig)
 	repo.InsertInitialDataToMongo()
 	
-
 	service := s.NewService(repo)
 	handler := api.NewHandler(service)
 	
@@ -26,25 +27,19 @@ func main() {
 	http.HandleFunc("/", api.AllowMethods(handler.Get, "GET"))
 
 	server := http.Server{
-		Addr:		":3000",
+		Addr:		serverConfig.Addr,
+		ReadTimeout:	10 * time.Second,
+		WriteTimeout:	10 * time.Second,
 	}
 	
 	log.Println("listening..")	
 	log.Fatal(server.ListenAndServe())
 }
 
-func chooseRepo() s.Repository {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("must have a .env file")
-	}
-
-	switch os.Getenv("db") {
+func chooseRepo(cfg config.RepositoryConfiguration) s.Repository {
+	switch cfg.Fetch("Database") {
 		case "mongo":
-			mongoUrl := os.Getenv("MONGO_URL")
-			mongoDb := os.Getenv("MONGO_DB")
-			timeout, _ := strconv.Atoi(os.Getenv("TIMEOUT"))
-			repo, err := mongo.NewMongoRepository(mongoUrl, mongoDb, timeout)
+			repo, err := mongo.NewMongoRepository(cfg.Fetch("MONGO_URL"), cfg.Fetch("MONGO_DB"), 15)
 			if err != nil {
 				log.Fatal(err)
 			}

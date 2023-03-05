@@ -3,6 +3,7 @@ module github.com/aliziyacevik/exchanger
 go 1.18
 
 require (
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/go-chi/chi/v5 v5.0.8
 	github.com/joho/godotenv v1.5.1
 	github.com/pkg/errors v0.9.1

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"log"
 
+//	"github.com/dgrijalva/jwt-go"
+
 	s"github.com/aliziyacevik/exchanger/internal/service"
 
 )
@@ -17,6 +19,12 @@ type Handler interface {
 
 type handler struct {
 	service		s.Service
+}
+
+func NewHandler(service s.Service) Handler {
+	return &handler{
+		service:	service,
+	}
 }
 
 func (h *handler) Post(w http.ResponseWriter, r*http.Request) {
@@ -59,12 +67,41 @@ func AllowMethods(fn func(http.ResponseWriter, *http.Request), listOfAllowedMeth
 
 }
 
+/*
+func MustAuth(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+	return func(w http.ResponseWriter, r*http.Request) {
+		token := r.Header.Get("Authorization")
+		if token == "" {
+			log.Println("Unauthorized access")
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
 
-func NewHandler(service s.Service) Handler {
-	return &handler{
-		service:	service,
+		claims := jwt.MapClaims{}
+		tkn, err := jwt.ParseWithClaims(
+			token,
+			claims,
+			func(token *jwt.Token) (interface{}, error) {
+				return tokenKey, nil
+			})
+
+		if err != nil || !tkn.Valid {
+			log.Println("Invalid token!")
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		if isAuthenticated := claims["authenticated"]; isAuthenticated != true {
+			log.Println("Unauthorized access")
+			http.Error(w, err.Error(), http.StatusUnauthorized)
+			return
+		
+		}
 	}
+	fn(w, r)
 }
+*/
+
 
 
 
