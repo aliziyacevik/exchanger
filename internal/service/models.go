@@ -1,10 +1,5 @@
 package service 
 
-import (
-//	"fmt"
-//	"time"
-)
-
 type Transaction struct {
 	Query		Query	`json:"query"	bson:"query"`
 	Result		float64	`json:"result"  bson:"result"`
@@ -26,12 +21,4 @@ type Currency struct {
 	Base		string			`bson:"base"` 
 	Rates		map[string]float64	`bson:"rates"`
 }
-
-
-func NewTransaction(from string, to string, amount int64) (*Transaction) {
-	transaction := &Transaction{}
-	return transaction
-}
-
-
 
