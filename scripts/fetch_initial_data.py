@@ -6,14 +6,13 @@
 import requests
 import os
 import json
+import csv
 import sys
 
 import pandas as pd # for converting json to csv
 
 
 from dotenv import load_dotenv
-
-#data = None 
 
 def fetch(URL, payload, headers):
     print("trying to fetch data from: ", URL)
@@ -25,10 +24,8 @@ def fetch(URL, payload, headers):
     print("fetched succesfully from: ", URL)
     return response
 
-
 def get_symbols():
     API_KEY = os.environ.get("FIXER_IO_KEY")
-    API_KEY = "B8Pl9MAMErjNKChI8h0BEzMyb6Y986nS"
     url = "https://api.apilayer.com/fixer/symbols"
     
     payload = {}
@@ -37,11 +34,13 @@ def get_symbols():
         }
     response = fetch(url, payload, headers)
     
-    data_frame = pd.read_json(response.text)
-    data_frame = data_frame.drop(columns = 'success')
-   
+    data_json = json.loads(response.text)
+    data_json.pop('success', None)
+    data_json = data_json['symbols']
+    data_text = json.dumps(data_json).replace('{', '').replace("}",'').replace('"', '').replace(',','\n').replace(":",",").replace(" ", '').replace("\t", '')
+    
     print("symbols fetched..")
-    return data_frame.to_json()
+    return data_text
 
 def get_currency(currency_name):
     url = "https://api.apilayer.com/fixer/latest?base=" + currency_name
@@ -55,42 +54,65 @@ def get_currency(currency_name):
     return response.text 
 
 
-def get_currencies(data_as_text):
-    data = json.loads(data_as_text)
-    data = data['symbols']
-    
-    response_text = ""
-    count = 0
-    for value, desc in data.items():
-        count += 1
-        response_text += get_currency(value) 
-        if count == 1:
-            break
-    data_frame = pd.read_json(response_text)
-    data_frame = data_frame.drop(columns = ['success', 'timestamp', 'date'])
-
+def get_currencies(filename):
+    with open(filename, 'r') as file:
+        reader = csv.reader(file)
+        count = 0
+        return_text = "["
+        for row in reader:
+            base = row[0]
+            if base != 'Value':
+                response_text = get_currency(base) 
+        
+                data_json = json.loads(response_text)
+                data_json.pop('success', None)
+                data_json.pop('timestamp', None)
+                data_json.pop('date', None)
+        
+                response_text = json.dumps(data_json)
+                return_text += response_text 
+                 
+                if count == 5:
+                    break
+                else:
+                    return_text += ","
+                count += 1
+    print(return_text)
     print(count ," currencies have been fetched")
-    return data_frame.to_json()
+    return return_text + ']'
 
-def save_to(data, file_name, formatt):
+def save_to(data_text, file_name, formatt):
     fullname = file_name + '.' + formatt
     if formatt == 'csv':
-        data_frame = pd.read_json(data)
-        data_frame.to_csv(fullname)
-    elif formatt =='json':
-        data_frame = pd.read_json(data)
-        data_frame.to_json(fullname)
-    else:
-        print("only json and csv formats are supported.")
-        raise SystemExit()
+        try:
+            with open(fullname, "w") as file:
+                headers = ['Value', 'Description']
+                writer = csv.writer(file)
+                writer.writerow(headers)
+            
+                rows = data_text.split('\n')
+                for row in rows:
+                    row = row.split(',')
+                    writer.writerow(row)
+                
+        except:
+            print(fullname, "file saved.")
+            raise SystemExit()
+
+    elif formatt == 'json':
+        data_json = json.loads(data_text)
+        with open(fullname, 'w') as outfile:
+            outfile.write(data_text)
 
     print("File saved to:", fullname)
 
 if __name__ == "__main__":
     load_dotenv()
     
+    filename = 'symbols'
     symbols_as_text = get_symbols()
-    currencies_as_text = get_currencies(symbols_as_text)
+    save_to(symbols_as_text, filename, 'csv')
     
-    save_to(symbols_as_text, 'symbols', 'csv')
+    currencies_as_text = get_currencies(filename + '.csv') 
     save_to(currencies_as_text, 'currencies', 'json')
+

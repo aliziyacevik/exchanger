@@ -6,9 +6,9 @@ import (
 	"github.com/pkg/errors"
 	"os"
 	"log"
-	"encoding/csv"
-	"encoding/json"
 	"io/ioutil"
+	"encoding/json"
+	"encoding/csv"
 
 	s"github.com/aliziyacevik/exchanger/internal/service"
 
@@ -174,21 +174,37 @@ func insertSymbolsToMemory(){
 }
 
 func insertCurrenciesToMemory() {
+	count := 0
 	f, err := os.Open("currencies.json")
-	defer f.Close()
-	
-	if err != nil {
-		log.Fatal(errors.Wrap(err,"mongo.insertCurrenciess")) 
-	}
-	
-	byteValue, _ := ioutil.ReadAll(f)
-	//result := Currency{}
 
-	err = json.Unmarshal([]byte(byteValue), &currencies)
 	if err != nil {
-		log.Fatal(errors.Wrap(err,"mongo.insertCurrenciesToMemory")) 
+		log.Fatal(errors.Wrap(err, "mongo.insertCurrenciesToMemory error occured while opening json file"))
 	}
-	log.Println("currencies has been aded to the memory.")
+	defer f.Close()
+		
+	jsonByte, err := ioutil.ReadAll(f)
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "mongo.insertCurrenciesToMemory error occured while reading file"))
+	}
+	
+	var jsonData []s.Currency
+	err = json.Unmarshal(jsonByte, &jsonData)
+
+	if err != nil {
+		log.Fatal(errors.Wrap(err, "mongo.insertCurrenciesToMemory error occured while unmarshaling"))
+	}
+
+	for _, data := range jsonData {
+		currency := bson.D{
+			{"base",	data.Base}, 
+			{"rates",	data.Rates},
+		} 
+
+		currencies = append(currencies, currency)
+		count += 1
+	}
+
+	log.Printf("%d currencies has been loaded into memory.", count)
 }
 
 

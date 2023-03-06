@@ -17,6 +17,7 @@ type Symbol struct {
 	Description	string `json:"desc"	bson:"desc"`
 }
 
+
 type Currency struct {
 	Base		string			`bson:"base"` 
 	Rates		map[string]float64	`bson:"rates"`
