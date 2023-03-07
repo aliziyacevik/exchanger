@@ -5,9 +5,7 @@ import (
 	"encoding/json"
 	"log"
 
-//	"github.com/dgrijalva/jwt-go"
-
-	s"github.com/aliziyacevik/exchanger/internal/service"
+	"github.com/aliziyacevik/exchanger/domain"
 
 )
 
@@ -18,17 +16,17 @@ type Handler interface {
 }
 
 type handler struct {
-	service		s.Service
+	service		domain.Service
 }
 
-func NewHandler(service s.Service) Handler {
+func NewHandler(service domain.Service) Handler {
 	return &handler{
 		service:	service,
 	}
 }
 
 func (h *handler) Post(w http.ResponseWriter, r*http.Request) {
-           	var q s.Query
+           	var q domain.Query
 
                  err := json.NewDecoder(r.Body).Decode(&q)
                  if err != nil {

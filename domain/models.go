@@ -1,4 +1,4 @@
-package service 
+package domain 
 
 type Transaction struct {
 	Query		Query	`json:"query"	bson:"query"`

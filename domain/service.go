@@ -1,4 +1,4 @@
-package service 
+package domain 
 
 type Service interface {
 	Convert (q Query) (*Transaction, error)

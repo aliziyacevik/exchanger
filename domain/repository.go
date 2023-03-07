@@ -1,9 +1,9 @@
-package service
+package domain 
 
 
 type Repository interface {
 	Find(base string) (*Currency, error)
-	InsertInitialDataToMongo() 
+	InsertInitialDataToDatabase() 
 }
 
 
