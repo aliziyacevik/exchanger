@@ -1,0 +1,2 @@
+selamlar=lala
+selamlar2=lala
